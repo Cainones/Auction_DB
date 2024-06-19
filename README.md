@@ -365,7 +365,7 @@ DELIMITER ;
 ```
 
 > [!IMPORTANT]
-> ## Вложенные операции:
+> ## триггер:
 
 ```sql
 DELIMITER $$
