@@ -150,15 +150,46 @@ WHERE
     items_type.type = 'Тип_предмета';
 ```
 
+### Запрос на получение всех торговцев с их товарами и ценами:
 
+```sql
+SELECT 
+    merchant_s.id AS merchant_id,
+    merchant_s.merchant_s_name,
+    supply_m.title AS supply_title,
+    items.title AS item_title,
+    merchant_s_price.merchant_s_price AS merchant_price,
+    merchant_s_price.link_url
+FROM 
+    merchant_s
+JOIN 
+    supply_m ON merchant_s.supply_m_id = supply_m.id
+JOIN 
+    demand_creates_supply ON merchant_s.id = demand_creates_supply.merchant_s_id
+JOIN 
+    merchant_s_price ON demand_creates_supply.merchant_s_price_id = merchant_s_price.id
+JOIN 
+    items ON merchant_s_price.items_id = items.id;
+```
 
+### Запрос на получение всех характеристик для заданного товара:
 
-
-
-
-
-
-
+```sql
+SELECT 
+    items.id AS itemid,
+    items.title AS item_title,
+    characteristic.price_per_slot,
+    characteristic.merchant_s_price AS characteristic_merchant_price,
+    characteristic.initial_price,
+    characteristic.sizes,
+    characteristic.mass
+FROM 
+    items
+JOIN 
+    characteristic ON items.characteristic_id = characteristic.id
+WHERE 
+    items.title = 'Название товара';
+```
 
 
 
