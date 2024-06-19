@@ -198,6 +198,8 @@ WHERE
 > [!IMPORTANT]
 > ## View представление
 
+### Это представление vw_items_information объединяет данные из различных таблиц и предоставляет комплексную информацию о товарах, их характеристиках, типах, ценах от продавцов и продавцах.
+
 ```sql
 CREATE VIEW items_information AS
 SELECT items.id AS item_id,
@@ -221,7 +223,9 @@ LEFT JOIN merchant_s ON merchant_s_price.id = merchant_s.supply_m_id;
 ```
 
 > [!IMPORTANT]
-> ## вложенные операции транзакция, условие, обработчик исключений
+> ## Вложенные операции: 
+
+### транзакция, условие, обработчик исключений
 
 ```sql
 DELIMITER $$
