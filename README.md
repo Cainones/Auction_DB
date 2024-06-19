@@ -98,5 +98,17 @@ FLUSH PRIVILEGES;
 
 > [!IMPORTANT]
 > ## Типовые запросы:
-> > [!WARNING]
-> > > ДЛЦ
+
+### Запрос на получение всех товаров и их текущих цен у различных продавцов:
+
+```sql
+SELECT 
+    items.id AS item_id,
+    items.title AS item_title,
+    merchant_s_price.merchant_s_price AS merchant_price,
+    merchant_s_price.link_url
+FROM 
+    items 
+JOIN 
+    merchant_s_price ON items.id = merchant_s_price.items_id;
+```
