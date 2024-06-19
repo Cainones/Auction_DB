@@ -3,6 +3,6 @@
 
 > [!NOTE]
 > ## Развёртка дампа:
-- George Washington
+- Установите файл prothesis.sql
 * John Adams
 + Thomas Jefferson
