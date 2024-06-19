@@ -223,9 +223,12 @@ LEFT JOIN merchant_s ON merchant_s_price.id = merchant_s.supply_m_id;
 ```
 
 > [!IMPORTANT]
-> ## Вложенные операции: 
+> ## Хранимые процедуры: 
 
-### транзакция, условие, обработчик исключений
+### Данная хранимая процедура содержит: 
+- Обработчик исключений
+* Транзакцию 
++ Условие
 
 ```sql
 DELIMITER $$
@@ -322,7 +325,43 @@ END $$
 DELIMITER ;
 ```
 
-### доп вложенная операция для работы с тригерами
+> [!IMPORTANT]
+> ## Триггер для хранимой процедуры:
+
+### Триггер для автоматического обновления суммарной стоимости характеристик:
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER UpdateTotalCharacter
+AFTER UPDATE ON merchant_s_price
+FOR EACH ROW
+BEGIN
+    DECLARE total_price DECIMAL(10,2);
+
+    SELECT SUM(characteristic.merchant_s_price)
+    INTO total_price
+    FROM merchant_s_price
+    JOIN items ON merchant_s_price.items_id = items.id
+    JOIN characteristic ON items.characteristic_id = characteristic.id
+    WHERE merchant_s_price.id = NEW.id;
+
+    UPDATE characteristic
+    SET total_price = total_price
+    WHERE id = (
+        SELECT characteristic_id
+        FROM items
+        WHERE id = NEW.items_id
+    );
+END $$
+
+DELIMITER ;
+```
+
+> [!IMPORTANT]
+> ## Хранимая процедура для работы с триггером:
+
+### Хранимая процедура
 
 ```sql
 DELIMITER $$
@@ -359,37 +398,6 @@ BEGIN
     END IF;
 
     COMMIT;
-END $$
-
-DELIMITER ;
-```
-
-> [!IMPORTANT]
-> ## триггер:
-
-```sql
-DELIMITER $$
-
-CREATE TRIGGER UpdateTotalCharacter
-AFTER UPDATE ON merchant_s_price
-FOR EACH ROW
-BEGIN
-    DECLARE total_price DECIMAL(10,2);
-
-    SELECT SUM(characteristic.merchant_s_price)
-    INTO total_price
-    FROM merchant_s_price
-    JOIN items ON merchant_s_price.items_id = items.id
-    JOIN characteristic ON items.characteristic_id = characteristic.id
-    WHERE merchant_s_price.id = NEW.id;
-
-    UPDATE characteristic
-    SET total_price = total_price
-    WHERE id = (
-        SELECT characteristic_id
-        FROM items
-        WHERE id = NEW.items_id
-    );
 END $$
 
 DELIMITER ;
