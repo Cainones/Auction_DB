@@ -11,13 +11,13 @@
 
 > [!IMPORTANT]
 > ## Система прав и ролей:
-### Администратор
+### Администратор:
 
 ```sql
 -- Создание роли Администратор
 CREATE ROLE IF NOT EXISTS admin; 
 
--- Предоставление полных прав администратору на схему housing
+-- Предоставление полных прав администратору
 GRANT ALL PRIVILEGES ON auction_db.* TO admin;
 
 -- Создание пользователя
@@ -28,6 +28,34 @@ GRANT admin TO 'admins'@'localhost';
 
 -- Устанавливается роль admin как роль по умолчанию для пользователя 'admin'
 SET DEFAULT ROLE admin TO 'admins'@'localhost';
+
+-- Применение изменений прав
+FLUSH PRIVILEGES;
+```
+
+### Модератор:
+
+```sql
+-- Создание роли Модератор
+CREATE ROLE IF NOT EXISTS moderator; 
+
+-- Присвоение прав
+GRANT SELECT, INSERT, UPDATE ON auction_db.items_type TO moderator;
+GRANT SELECT, INSERT, UPDATE ON auction_db.characteristic TO moderator;
+GRANT SELECT, INSERT, UPDATE ON auction_db.items TO moderator;
+GRANT SELECT ON auction_db.demand_creates_supply TO moderator;
+GRANT SELECT ON auction_db.merchant_s TO moderator;
+GRANT SELECT ON auction_db.merchant_s_price TO moderator;
+GRANT SELECT ON auction_db.supply_m TO moderator;
+
+-- Создание пользователя
+CREATE USER IF NOT EXISTS 'moder'@'localhost' IDENTIFIED BY 'VAVLMod1';
+
+-- Назначение роли пользователю
+GRANT moderator TO 'moder'@'localhost';
+
+-- Устанавливается роль moderator как роль по умолчанию для пользователя 'moder'
+SET DEFAULT ROLE moderator TO 'moder'@'localhost';
 
 -- Применение изменений прав
 FLUSH PRIVILEGES;
