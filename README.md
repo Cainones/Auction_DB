@@ -99,7 +99,7 @@ FLUSH PRIVILEGES;
 > [!IMPORTANT]
 > ## Типовые запросы:
 
-### Запрос на получение всех товаров и их текущих цен у различных продавцов:
+### Запрос на получение всех товаров и их текущих цен у различных торговцев:
 
 ```sql
 SELECT 
@@ -112,3 +112,75 @@ FROM
 JOIN 
     merchant_s_price ON items.id = merchant_s_price.items_id;
 ```
+
+### Запрос на получение всех товаров с их типами и характеристиками:
+
+```sql
+SELECT 
+    items.id AS item_id,
+    items.title AS item_title,
+    items_type.type AS item_type,
+    characteristic.price_per_slot,
+    characteristic.merchant_s_price AS characteristic_merchant_price,
+    characteristic.initial_price,
+    characteristic.sizes,
+    characteristic.mass
+FROM 
+    items
+JOIN 
+    characteristic ON items.characteristic_id = characteristic.id
+JOIN 
+    items_type ON characteristic.items_type_id = items_type.id;
+```
+
+### Запрос на получение всех товаров определенного типа:
+
+```sql
+SELECT 
+    items.id AS itemid,
+    items.title AS item_title,
+    items_type.type AS item_type
+FROM 
+    items
+JOIN 
+    characteristic ON items.characteristic_id = characteristic.id
+JOIN 
+    items_type ON characteristic.items_type_id = items_type.id
+WHERE 
+    items_type.type = 'Тип_предмета';
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
