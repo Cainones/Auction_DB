@@ -196,7 +196,7 @@ WHERE
 > ## Выше перечисленные типовые запросы могут быть выполнены от роли [Администратор](#Администратор) или [Модератор](#Модератор).
 
 > [!IMPORTANT]
-> ## Viev представление
+> ## View представление
 
 ```sql
 CREATE VIEW items_information AS
@@ -220,11 +220,103 @@ LEFT JOIN merchant_s_price ON items.id = merchant_s_price.items_id
 LEFT JOIN merchant_s ON merchant_s_price.id = merchant_s.supply_m_id;
 ```
 
+> [!IMPORTANT]
+> ## вложенные операции транзакция, условие, обработчик исключений
 
+```sql
+DELIMITER $$
 
+CREATE PROCEDURE AddNewItem(
+    IN new_item_title VARCHAR(255),
+    IN new_item_type VARCHAR(255),
+    IN new_characteristic_price_per_slot DECIMAL(10,2),
+    IN new_characteristic_merchants_price DECIMAL(10,2),
+    IN new_characteristic_initial_price DECIMAL(10,2),
+    IN new_characteristic_sizes INT,
+    IN new_characteristic_mass DECIMAL(10,2),
+    IN new_merchants_price DECIMAL(10,2),
+    IN new_link_url VARCHAR(255),
+    IN new_merchants_name VARCHAR(255),
+    IN new_supply_title VARCHAR(255)
+)
+BEGIN
+    DECLARE existing_item_type_id INT;
+    DECLARE existing_merchant_id INT;
 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
+    START TRANSACTION;
 
+    SELECT id INTO existing_item_type_id
+    FROM items_type
+    WHERE type = new_item_type;
+
+    IF existing_item_type_id IS NULL THEN
+        INSERT INTO items_type (type) VALUES (new_item_type);
+        SET existing_item_type_id = LAST_INSERT_ID();
+    END IF;
+
+    SELECT id INTO existing_merchant_id
+    FROM merchant_s
+    WHERE merchant_s_price = new_merchants_name;
+
+    IF existing_merchant_id IS NULL THEN
+        INSERT INTO merchant_s (merchant_s_price, supply_m_id) VALUES (new_merchants_name, (SELECT id FROM supply_m WHERE title = new_supply_title));
+        SET existing_merchant_id = LAST_INSERT_ID();
+    END IF;
+
+    INSERT INTO characteristic (
+        price_per_slot, 
+        merchant_s_price, 
+        initial_price, 
+        sizes, 
+        mass, 
+        items_type_id
+    ) VALUES (
+        new_characteristic_price_per_slot, 
+        new_characteristic_merchants_price, 
+        new_characteristic_initial_price, 
+        new_characteristic_sizes, 
+        new_characteristic_mass, 
+        existing_item_type_id
+    );
+    SET @new_characteristic_id = LAST_INSERT_ID();
+
+    INSERT INTO items (title, characteristic_id) VALUES (new_item_title, @new_characteristic_id);
+    SET @new_item_id = LAST_INSERT_ID();
+
+    INSERT INTO supply_m (title) VALUES (new_supply_title)
+    ON DUPLICATE KEY UPDATE title = new_supply_title;
+
+    SET @new_supply_id = LAST_INSERT_ID();
+
+    INSERT INTO merchant_s_price (
+        merchant_s_price, 
+        items_id,
+        link_url
+    ) VALUES (
+        new_merchants_price, 
+        @new_item_id, 
+        new_link_url
+    );
+    SET @new_merchants_price_id = LAST_INSERT_ID();
+
+    INSERT INTO demand_creates_supply (
+        merchant_s_price_id, 
+        merchant_s_id
+    ) VALUES (
+        @new_merchants_price_id, 
+        existing_merchant_id
+    );
+    COMMIT;
+END $$
+
+DELIMITER ;
+```
 
 
 
