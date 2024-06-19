@@ -195,12 +195,30 @@ WHERE
 > [!WARNING]
 > ## Выше перечисленные типовые запросы могут быть выполнены от роли [Администратор](#Администратор) или [Модератор](#Модератор).
 
+> [!IMPORTANT]
+> ## Viev представление
 
-
-
-
-
-
+```sql
+CREATE VIEW items_information AS
+SELECT items.id AS item_id,
+       items.title AS item_title,
+       characteristic.id AS characteristic_id,
+       characteristic.price_per_slot,
+       characteristic.merchant_s_price,
+       characteristic.initial_price,
+       characteristic.sizes,
+       characteristic.mass,
+       items_type.id AS item_type_id,
+       items_type.type AS item_type,
+       merchant_s_price.id AS merchant_price_id,
+       merchant_s_price.merchant_s_price AS merchant_item_price,
+       merchant_s_price.link_url
+FROM items
+JOIN characteristic ON items.characteristic_id = characteristic.id
+JOIN items_type ON characteristic.items_type_id = items_type.id
+LEFT JOIN merchant_s_price ON items.id = merchant_s_price.items_id
+LEFT JOIN merchant_s ON merchant_s_price.id = merchant_s.supply_m_id;
+```
 
 
 
