@@ -97,5 +97,5 @@ FLUSH PRIVILEGES;
 > - В дампе Auction_DB.sql уже присутствует минимальный набор данных для работы с ней!
 
 > [!IMPORTANT]
-> [!WARNING]
-> ДЛЦ
+> > [!WARNING]
+> > ДЛЦ
