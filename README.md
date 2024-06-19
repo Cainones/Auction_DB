@@ -198,7 +198,7 @@ WHERE
 > [!IMPORTANT]
 > ## View-представление:
 
-### Данное представление объединяет данные из различных предоставляя комплексную информацию о предметах:
+### Данное представление объединяет данные из различных таблиц, предоставляя комплексную информацию о предметах:
 
 ```sql
 CREATE VIEW items_information AS
@@ -322,12 +322,75 @@ END $$
 DELIMITER ;
 ```
 
+### доп вложенная операция для работы с тригерами
 
+```sql
+DELIMITER $$
 
+CREATE PROCEDURE UpdateMerchantPrice(
+    IN new_merchants_price DECIMAL(10,2),
+    IN items_id INT,
+    IN new_link_url VARCHAR(255)
+)
+BEGIN
+    DECLARE msp_id INT;
 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
+    START TRANSACTION;
 
+    SELECT id INTO msp_id
+    FROM merchant_s_price
+    WHERE items_id = items_id;
 
+    -- Если запись существует, обновляем данные
+    IF msp_id IS NOT NULL THEN
+        UPDATE merchant_s_price
+        SET merchant_s_price = new_merchants_price,
+            link_url = new_link_url
+        WHERE id = msp_id;
+    ELSE
+        INSERT INTO merchant_s_price (merchant_s_price, items_id, link_url)
+        VALUES (new_merchants_price, items_id, new_link_url);
+    END IF;
 
+    COMMIT;
+END $$
 
+DELIMITER ;
+```
 
+> [!IMPORTANT]
+> ## Вложенные операции:
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER UpdateTotalCharacter
+AFTER UPDATE ON merchant_s_price
+FOR EACH ROW
+BEGIN
+    DECLARE total_price DECIMAL(10,2);
+
+    SELECT SUM(characteristic.merchant_s_price)
+    INTO total_price
+    FROM merchant_s_price
+    JOIN items ON merchant_s_price.items_id = items.id
+    JOIN characteristic ON items.characteristic_id = characteristic.id
+    WHERE merchant_s_price.id = NEW.id;
+
+    UPDATE characteristic
+    SET total_price = total_price
+    WHERE id = (
+        SELECT characteristic_id
+        FROM items
+        WHERE id = NEW.items_id
+    );
+END $$
+
+DELIMITER ;
+```
